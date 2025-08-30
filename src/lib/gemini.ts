@@ -1,18 +1,32 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-
 export async function generateBlogContent(prompt: string): Promise<string> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-    
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-    
-    return text;
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.X_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        model: 'grok-beta',
+        stream: false,
+        temperature: 0.7
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`XAI API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content;
   } catch (error) {
-    console.error('Error generating content with Gemini:', error);
+    console.error('Error generating content with XAI:', error);
     throw new Error('Failed to generate content');
   }
 }
@@ -48,15 +62,27 @@ Make sure the content is well-structured with:
 - Natural mentions of how AI technology can help with dog training and care
 
 The content should be informative and valuable even for people who don't yet own an Axar robot, but subtly highlight how AI technology is revolutionizing pet care.
+
+IMPORTANT: Return ONLY the JSON object, no other text before or after.
 `;
 
   try {
     const response = await generateBlogContent(prompt);
     
     // Clean up the response to extract JSON
-    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    let cleanedResponse = response.trim();
+    
+    // Remove any markdown code block formatting
+    if (cleanedResponse.startsWith('```json')) {
+      cleanedResponse = cleanedResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (cleanedResponse.startsWith('```')) {
+      cleanedResponse = cleanedResponse.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+    
+    // Try to find JSON in the response
+    const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      throw new Error('Invalid response format from Gemini');
+      throw new Error('Invalid response format from XAI');
     }
     
     const blogData = JSON.parse(jsonMatch[0]);
