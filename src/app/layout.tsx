@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Axar Robotics - Multimodal AI Robot for Dogs",
+  title: "Axar Robotics - Multimodal AI Robot for humans best friend",
   description: "Revolutionary multimodal AI robot designed from the ground up to entertain and train dogs. Experience the future of pet technology.",
 };
 
