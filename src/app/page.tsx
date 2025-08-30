@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function Home() {
   const [email, setEmail] = useState('');
@@ -43,7 +44,7 @@ export default function Home() {
           </div>
           <div className="hidden md:flex space-x-8">
             <a href="#features" className="text-gray-300 hover:text-white transition-colors">Features</a>
-            <a href="#about" className="text-gray-300 hover:text-white transition-colors">About</a>
+            <Link href="/blog" className="text-gray-300 hover:text-white transition-colors">Blog</Link>
             <a href="#contact" className="text-gray-300 hover:text-white transition-colors">Contact</a>
           </div>
         </nav>
